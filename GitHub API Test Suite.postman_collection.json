@@ -1,0 +1,765 @@
+{
+  "info": {
+    "_postman_id": "f9c8cd34-0571-43e5-808c-64d2eb9dabe6",
+    "name": "GitHub API Test Suite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50278476",
+    "_collection_link": "https://go.postman.co/collection/50278476-f9c8cd34-0571-43e5-808c-64d2eb9dabe6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Happy Path",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json()\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has a JSON body\",function(){\r",
+                  "    pm.expect(body).to.be.an('object');\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response has a 'login' field\",function(){\r",
+                  "    pm.expect(body).to.have.property('login');\r",
+                  "})\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Repo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {\r",
+                  "    pm.response.to.have.status(201);    \r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 5000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response body contains the correct repository name\", function () {\r",
+                  "    pm.expect(pm.response.json().name).to.eql(\"postman-test-repo2\"); \r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response body contains the correct owner login\", function () {\r",
+                  "    pm.expect(pm.response.json().owner.login).to.eql(\"Rafia-Haider\"); \r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"repo is created in correct url\",function(){\r",
+                  "    pm.expect(pm.response.json().html_url).to.include(\"Rafia-Haider/postman-test-repo2\");\r",
+                  "})\r",
+                  "\r",
+                  "pm.environment.set(\"repo_name\", pm.response.json().name);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"postman-test-repo2\",\r\n    \"description\": \"Created via Postman for API testing practice\",\r\n    \"private\": false,\r\n    \"auto_init\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/user/repos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Issue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Status code is 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Issue title is correct\", function () {\r",
+                  "    pm.expect(json.title).to.eql(\"Test issue from Postman\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Issue body is correct\", function () {\r",
+                  "    pm.expect(json.body).to.eql(\"This issue was created automatically via the GitHub API\");\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"issue is created at correct url\", function(){ \r",
+                  "    pm.expect(json.url).to.include(`/repos/Rafia-Haider/${pm.environment.get(\"repo_name\")}/issues/`)\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Issue number exists\", function () {\r",
+                  "    pm.expect(json.number).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.environment.set(\"issue_number\", json.number);\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Test issue from Postman\",\r\n    \"body\": \"This issue was created automatically via the GitHub API\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/{{repo_name}}/issues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "{{repo_name}}",
+                "issues"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Issue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json()\r",
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"User is Rafia haider\", function(){\r",
+                  "    pm.expect(json.user.login).to.eql(\"Rafia-Haider\");\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"issue title is Test issue from Postman\", function(){   \r",
+                  "    pm.expect(json.title).to.eql(\"Test issue from Postman\");\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"issue state is open\", function(){   \r",
+                  "    pm.expect(json.state).to.eql(\"open\");\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Issue number matches\", function(){\r",
+                  "    pm.expect(json.number).to.eql(pm.environment.get(\"issue_number\"));\r",
+                  "})\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/{{repo_name}}/issues/{{issue_number}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "{{repo_name}}",
+                "issues",
+                "{{issue_number}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Create Issue No Title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Status code is 422\", function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Message field exists\",function(){\r",
+                  "    pm.expect(json.message).to.not.be.undefined;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Message mentions missing title\", function () {\r",
+                  "    const message = json.message;\r",
+                  "    pm.expect(message).to.include(`\"title\" wasn't supplied`);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"body\": \"This issue has no title\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/{{repo_name}}/issues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "{{repo_name}}",
+                "issues"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Status code is 401\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response body is JSON\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('object');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response message says 'Bad credentials'\", function () {\r",
+                  "    pm.expect(jsonData.message).to.eql(\"Bad credentials\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has documentation URL\", function () {\r",
+                  "    pm.expect(jsonData.documentation_url).to.include(\"docs.github.com\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response status field is 401\", function () {\r",
+                  "    pm.expect(jsonData.status).to.eql(\"401\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalidtoken123",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Repo No Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Status code is 422\", function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000 ms\",function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Message field contains expected error message\", function () {\r",
+                  "    pm.expect(jsonData.message).to.include(\"New repository name must not be blank\");\r",
+                  "    })\r",
+                  "\r",
+                  "pm.test(\"Resonse has an errors array\",function(){\r",
+                  "    pm.expect(jsonData).to.have.property(\"errors\");\r",
+                  "    pm.expect(jsonData.errors).to.be.an(\"array\").that.is.not.empty;\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Errors include missing repository name\", function () {\r",
+                  "    const hasMissingNameError = pm.response.json().errors.some(error =>\r",
+                  "        error.resource === \"Repository\" &&\r",
+                  "        error.field === \"name\" &&\r",
+                  "        error.code === \"missing_field\"\r",
+                  "    );\r",
+                  "\r",
+                  "    pm.expect(hasMissingNameError).to.be.true;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"description\": \"This repo has no name\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/user/repos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Nonexistent Repo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000 ms\",function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response body has message field with 'Not Found'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Not Found\");\r",
+                  "    });\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Response body contains 'documentation_url'\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.have.property(\"documentation_url\");\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/this-repo-does-not-exist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "this-repo-does-not-exist"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases",
+      "item": [
+        {
+          "name": "Create Issue Whitespace Title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is under 2000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "let jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response body is valid JSON\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"object\");",
+                  "});",
+                  "",
+                  "pm.test(\"Top-level message equals 'Validation Failed'\", function () {",
+                  "    pm.expect(jsonData.message).to.eql(\"Validation Failed\");",
+                  "});",
+                  "",
+                  "pm.test(\"Errors is a non-empty array\", function () {",
+                  "    pm.expect(jsonData.errors).to.be.an(\"array\").that.is.not.empty;",
+                  "});",
+                  "",
+                  "pm.test(\"Error contains correct details for blank title\", function(){",
+                  "    const hasCorrectError = jsonData.errors.some(error =>",
+                  "        error.message === \"title can't be blank\" &&",
+                  "        error.resource === \"Issue\" &&",
+                  "        error.field === \"title\" &&",
+                  "        error.code === \"invalid\"",
+                  "    );",
+                  "    pm.expect(hasCorrectError).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"          \"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/{{repo_name}}/issues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "{{repo_name}}",
+                "issues"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete Repo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response body is empty\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.be.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/{{repo_name}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "{{repo_name}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Deleted Repo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is less than 2000ms\", function(){\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has documentation_url\", function(){\r",
+                  "    pm.expect(pm.response.json()).to.have.property(\"documentation_url\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is Not Found\", function(){\r",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Not Found\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/repos/Rafia-Haider/{{repo_name}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "repos",
+                "Rafia-Haider",
+                "{{repo_name}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
